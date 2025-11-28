@@ -9,17 +9,11 @@ export const getUpworkToken = async (req, res) => {
 
     const upworkToken = await UpworkToken.findOne({ userId });
 
-    if (!upworkToken) {
-      return res.status(404).json({
-        success: false,
-        message: "Upwork token not found for this user",
-      });
-    }
-
+    // Return empty token if not found (instead of 404)
     res.status(200).json({
       success: true,
       data: {
-        upwork_tok: upworkToken.upwork_tok,
+        upwork_tok: upworkToken?.upwork_tok || null,
       },
     });
   } catch (err) {

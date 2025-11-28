@@ -40,7 +40,7 @@ export const loginUser = async (req, res) => {
     // Set token in HTTP-only cookie
     res.cookie("token", token, {
       httpOnly: true, // Prevents JavaScript access to cookie
-      secure: process.env.NODE_ENV, // HTTPS only in production
+      secure: process.env.NODE_ENV === "production", // HTTPS only in production
       sameSite: "strict", // CSRF protection
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
     });
@@ -48,12 +48,60 @@ export const loginUser = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Login successful",
-      token,
+      user: {
+        id: user._id,
+        email: user.email,
+      },
     });
   } catch (err) {
     res.status(500).json({
       success: false,
       message: err.message || "Error during login",
+    });
+  }
+};
+
+/**
+ * Verify authentication status
+ * Uses authenticate middleware to check if user is authenticated
+ */
+export const verifyAuth = async (req, res) => {
+  try {
+    // If middleware passed, user is authenticated
+    res.status(200).json({
+      success: true,
+      user: {
+        id: req.user._id,
+        email: req.user.email,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Error verifying authentication",
+    });
+  }
+};
+
+/**
+ * Logout user by clearing the token cookie
+ */
+export const logoutUser = async (req, res) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Logout successful",
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Error during logout",
     });
   }
 };
