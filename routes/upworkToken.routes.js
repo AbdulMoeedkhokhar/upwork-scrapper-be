@@ -5,7 +5,7 @@ import { authenticate } from "../middleware/auth.middleware.js";
 const router = express.Router();
 
 // All routes require authentication
-router.get("/", authenticate, getUpworkToken);
+router.get("/", getUpworkToken);
 router.post("/", authenticate, saveUpworkToken);
 router.put("/", authenticate, saveUpworkToken); // PUT also uses saveUpworkToken (upsert)
 

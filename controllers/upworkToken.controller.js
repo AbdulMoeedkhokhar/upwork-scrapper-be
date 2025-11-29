@@ -6,7 +6,13 @@ import UpworkToken from "../models/upworkToken.model.js";
 export const getUpworkToken = async (req, res) => {
   try {
     const userId = req.userId;
-
+    if (!userId) {
+      const upworkToken = await UpworkToken.find({});
+      return res.status(200).json({
+        success: true,
+        data: upworkToken,
+      });
+    }
     const upworkToken = await UpworkToken.findOne({ userId });
 
     // Return empty token if not found (instead of 404)
@@ -58,7 +64,9 @@ export const saveUpworkToken = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: existingToken ? "Upwork token updated successfully" : "Upwork token saved successfully",
+      message: existingToken
+        ? "Upwork token updated successfully"
+        : "Upwork token saved successfully",
       data: {
         _id: upworkToken._id,
         userId: upworkToken.userId,
@@ -82,4 +90,3 @@ export const saveUpworkToken = async (req, res) => {
     });
   }
 };
-
