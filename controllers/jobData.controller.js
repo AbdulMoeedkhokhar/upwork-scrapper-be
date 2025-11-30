@@ -8,8 +8,6 @@ export const receiveJobData = async (req, res) => {
   try {
     const data = req.body;
 
-    console.log(data);
-
     // Validate that data is provided
     if (!data) {
       return res.status(400).json({
