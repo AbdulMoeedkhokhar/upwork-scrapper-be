@@ -32,6 +32,9 @@ export const jobDataDTO = (jobData) => {
     country: buyer?.location?.country || null,
     city: buyer?.location?.city || null,
     logo: buyer?.logo || null,
+    status: jobData?.status || null,
+    outreachedBy: jobData?.outreachedBy || null,
+    timestamp: data?.jobDetails?.jobDetails?.opening?.job?.publishTime || null,
   };
 };
 

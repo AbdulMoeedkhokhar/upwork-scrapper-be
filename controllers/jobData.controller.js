@@ -87,3 +87,73 @@ export const getAllJobData = async (req, res) => {
   }
 };
 
+/**
+ * Update job status and outreachedBy by jobId
+ */
+export const updateJobStatus = async (req, res) => {
+  try {
+    const { jobId, status, outreachedBy } = req.body;
+
+    // Validate that jobId is provided
+    if (!jobId) {
+      return res.status(400).json({
+        success: false,
+        message: "Job ID is required.",
+      });
+    }
+
+    // Validate status if provided
+    if (status && !["out reached", "not found", "no"].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid status. Status must be one of: 'out reached', 'not found', 'no'",
+      });
+    }
+
+    // Find the job by jobId
+    const job = await JobData.findOne({
+      "data.jobId": jobId,
+    });
+
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: "Job not found with the provided job ID.",
+      });
+    }
+
+    // Prepare update object
+    const updateData = {};
+    if (status !== undefined) {
+      updateData.status = status;
+    }
+    if (outreachedBy !== undefined) {
+      updateData.outreachedBy = outreachedBy;
+    }
+
+    // Update the job
+    const updatedJob = await JobData.findByIdAndUpdate(
+      job._id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Job status updated successfully",
+      data: {
+        id: updatedJob._id,
+        jobId: updatedJob.data.jobId,
+        status: updatedJob.status,
+        outreachedBy: updatedJob.outreachedBy,
+        updatedAt: updatedJob.updatedAt,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Error updating job status",
+    });
+  }
+};
+

@@ -7,6 +7,14 @@ const jobDataSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
       required: true,
     },
+    status: {
+      type: String,
+      enum: ["out reached", "not found", "no"],
+      default: "no",
+    },
+    outreachedBy: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
