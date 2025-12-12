@@ -62,20 +62,41 @@ export const receiveJobData = async (req, res) => {
 /**
  * Get all job data (authenticated route)
  * Returns only specific fields via DTO
+ * Supports pagination via query parameter: ?page=1 (defaults to page 1)
+ * Returns 15 items per page
  */
 export const getAllJobData = async (req, res) => {
   try {
-    // Fetch all job data from database, sorted by most recent first
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = 15; // 15 items per page
+    const skip = (page - 1) * limit;
+
+    // Get total count for pagination
+    const totalCount = await JobData.countDocuments({});
+
+    // Fetch paginated job data from database, sorted by most recent first
     const allJobData = await JobData.find({})
       .sort({ createdAt: -1 })
-      .select('-__v'); // Exclude version key
+      .select('-__v') // Exclude version key
+      .skip(skip)
+      .limit(limit);
 
     // Transform to DTO format (only send specific fields)
     const jobDataDTO = jobDataListDTO(allJobData);
 
+    const totalPages = Math.ceil(totalCount / limit);
+
     res.status(200).json({
       success: true,
       message: "Job data retrieved successfully",
+      pagination: {
+        currentPage: page,
+        totalPages: totalPages,
+        totalCount: totalCount,
+        limit: limit,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
       count: jobDataDTO.length,
       data: jobDataDTO,
     });
