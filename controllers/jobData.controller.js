@@ -16,7 +16,29 @@ export const receiveJobData = async (req, res) => {
       });
     }
 
-    // Store the data in MongoDB
+    // Validate that jobId exists in data
+    if (!data.jobId) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid data. Please provide a jobId in the data object.",
+      });
+    }
+
+    // Check if job with this jobId already exists
+    const existingJob = await JobData.findOne({
+      "data.jobId": data.jobId,
+    });
+
+    if (existingJob) {
+      // Job already exists, return success response
+      return res.status(200).json({
+        success: true,
+        message: "Job data already exists",
+        
+      });
+    }
+
+    // Job doesn't exist, create new record
     const jobData = await JobData.create({
       data,
     });
